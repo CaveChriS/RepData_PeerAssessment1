@@ -9,17 +9,33 @@ The first steps are not code at all! For this to work you need to have the downl
 
 ###So lets first set the global options
 
-```{r setOptions}
+
+```r
 opts_chunk$set(echo=TRUE)
 if(!require(reshape2)) {install.packages("reshape2")}
+```
+
+```
+## Loading required package: reshape2
+```
+
+```r
 library(reshape2)
 if(!require(lattice)) {install.packages("lattice")}
+```
+
+```
+## Loading required package: lattice
+```
+
+```r
 library(lattice)
 ```
 
 ### Then lets read in the file as we are asked to
 
-```{r readInFile}
+
+```r
 fileLocation <- paste(getwd(),"/repdata_data_activity/","activity.csv",sep="")
 activityFile <- read.csv(fileLocation)
 ```
@@ -27,25 +43,30 @@ activityFile <- read.csv(fileLocation)
 
 Now we have a file lets histogram the steps (leaving the NAs in as asked)
 
-```{r createHistogramOfSteps}
+
+```r
 hist(activityFile$steps)
 ```
 
+![plot of chunk createHistogramOfSteps](figure/createHistogramOfSteps.png) 
+
 Now we need to print out the median and mean but I think we want to do it in a sentence neatly so...
 
-```{r setMeanAndMedianVariables, results='hide'}
+
+```r
 stepsSummary <- summary(activityFile$steps)
 medianOfSteps <- stepsSummary[["Median"]]
 meanOfSteps <- stepsSummary[["Mean"]]
 ```
 
-The median of the steps data is `r medianOfSteps` and the mean is `r meanOfSteps`.
+The median of the steps data is 0 and the mean is 37.4.
 
 ### plotting interval against average steps
 
 First the calculations where I will hide the results
 
-```{r calcs,results='hide'}
+
+```r
 noNAs <- activityFile[!is.na(activityFile$steps),]
 runAmelt <- melt(noNAs,id=c("interval"),measure.vars="steps")
 averageData <- dcast(runAmelt,interval ~ variable,mean)
@@ -53,19 +74,24 @@ averageData <- dcast(runAmelt,interval ~ variable,mean)
 
 Now I need to plot those results
 
-```{r plotOfStepsAndInterval}
+
+```r
 plot(averageData$interval,averageData$steps,type="l",xlab="Interval during day", ylab="No. of steps averaged across all days",main="Average steps against interval")
 ```
 
+![plot of chunk plotOfStepsAndInterval](figure/plotOfStepsAndInterval.png) 
+
 Now, which interval has the peak. I'll save the result and output is as statement again
 
-```{r peakInterval}
+
+```r
 higherInterval <- averageData[averageData$steps == max(averageData$steps),]$interval
 ```
 
-The interval with the highest number of steps is `r higherInterval`.
+The interval with the highest number of steps is 835.
 
-```{r noOfNAsindataset}
+
+```r
 noOfStepNAs <- sum(is.na(activityFile$steps))
 if (noOfStepNAs > 0) {
     stepWord <- "are"
@@ -73,6 +99,13 @@ if (noOfStepNAs > 0) {
     stepWord <- "is"
 }
 noOfDateNAs <- sum(is.na(activityFile$data))
+```
+
+```
+## Warning: is.na() applied to non-(list or vector) of type 'NULL'
+```
+
+```r
 if (noOfDateNAs > 0) {
     dateWord <- "are"
 } else {
@@ -87,11 +120,12 @@ if (noOfIntervalNAs > 0) {
 }
 ```
 
-The no of steps with NA values `r stepWord` `r noOfStepNAs`.  
-The no of dates with NA values `r dateWord` `r noOfDateNAs`.  
-The no of steps with NA values `r intervalWord` `r noOfIntervalNAs`.
+The no of steps with NA values are 2304.  
+The no of dates with NA values is 0.  
+The no of steps with NA values is 0.
 
-```{r replaceNAs}
+
+```r
 newActFile <- activityFile
 noOfRows <- nrow(newActFile)
 for (iH in 1:noOfRows) {
@@ -105,18 +139,22 @@ for (iH in 1:noOfRows) {
 hist(newActFile$steps)
 ```
 
-```{r newFileSummaries}
+![plot of chunk replaceNAs](figure/replaceNAs.png) 
+
+
+```r
 newStepsSummary <- summary(newActFile$steps)
 medianOfNewSteps <- newStepsSummary[["Median"]]
 meanOfNewSteps <- newStepsSummary[["Mean"]]
 ```
 
 
-The median of the no NAs-left-in-the-datasert steps data is `r medianOfNewSteps` and the mean is `r meanOfNewSteps`. As you can see there is no difference from the original data and that is to be expected due to the strategy that I followed to fill in the NAs with the average of that five minute interval!
+The median of the no NAs-left-in-the-datasert steps data is 0 and the mean is 37.4. As you can see there is no difference from the original data and that is to be expected due to the strategy that I followed to fill in the NAs with the average of that five minute interval!
 
 ### plotting weekdays / weekends against steps
 
-```{r weekdaysAndDates}
+
+```r
 ## change dates from class FACTOR to class DATE
 newActFile$date <- as.Date(newActFile$date, format="%Y-%m-%d")
 ## add a column of the weekdays
@@ -137,5 +175,6 @@ average2Data = within(average2Data, {
 xyplot(average2Data$steps~average2Data$interval|average2Data$weekendOfWeekDay, 
        main="", 
         ylab="Number of Steps", xlab="interval",layout=(c(1,2)),type=c("l"))
-
 ```
+
+![plot of chunk weekdaysAndDates](figure/weekdaysAndDates.png) 
